@@ -3,61 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Resume Builder</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Dynamic Resume Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #6A9C89;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: whitesmoke;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00712D;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #227B94;
+        }
+
+        input, textarea {
+            width: 96.5%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #227B94;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #00712D;
+        }
+
+        #resumePreview {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            color: #00712D;
+            border-radius: 8px;
+        }
+
+        #resumePreview h2 {
+            color: #227B94;
+        }
+
+        #resumePreview a {
+            color: #0056b3;
+            text-decoration: none;
+        }
+
+        #resumePreview a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Dynamic Resume Builder</h1>
-    
-    <!-- Form for user input -->
-    <div class="form-container">
+    <div class="container">
+        <h1>Dynamic Resume Generator</h1>
         <form id="resumeForm">
-            <h2>Personal Information</h2>
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
-            
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="phone">Phone:</label>
-            <input type="tel" id="phone" name="phone" required>
-            
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" required>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter your name">
+            </div>
 
-            <label for="profilePic">Profile Picture:</label>
-            <input type="file" id="profilePic" accept="image/*">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
 
-            <h2>Education</h2>
-            <label for="education">Degree:</label>
-            <input type="text" id="education" name="education" required>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" placeholder="Enter your phone number">
+            </div>
 
-            <label for="university">University/College:</label>
-            <input type="text" id="university" name="university" required>
+            <div class="form-group">
+                <label for="summary">Professional Summary</label>
+                <textarea id="summary" placeholder="Enter a brief professional summary"></textarea>
+            </div>
 
-            <label for="years">Year of Completion:</label>
-            <input type="text" id="years" name="years" required>
+            <div class="form-group">
+                <label for="skills">Skills</label>
+                <input type="text" id="skills" placeholder="Enter your skills (comma separated)">
+            </div>
 
-            <h2>Skills</h2>
-            <label for="skills">Skills (comma separated):</label>
-            <input type="text" id="skills" name="skills" required>
+            <div class="form-group">
+                <label for="linkedin">LinkedIn Profile</label>
+                <input type="url" id="linkedin" placeholder="Enter your LinkedIn profile URL">
+            </div>
 
-            <h2>Work Experience</h2>
-            <label for="experience">Experience (Job Title, Company, Duration):</label>
-            <textarea id="experience" name="experience" required></textarea>
-            
-            <button type="button" id="saveButton">Preview Resume</button>
-            <button type="button" id="downloadButton">Download as PDF</button>
+            <div class="form-group">
+                <label for="github">GitHub Profile</label>
+                <input type="url" id="github" placeholder="Enter your GitHub profile URL">
+            </div>
+
+            <div class="form-group">
+                <label for="experience">Work Experience</label>
+                <textarea id="experience" placeholder="Enter your work experience"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="education">Education</label>
+                <textarea id="education" placeholder="Enter your education background"></textarea>
+            </div>
+
+            <div class="buttons">
+                <button type="button" onclick="previewResume()">Preview Resume</button>
+                <button type="button" onclick="downloadPDF()">Download as PDF</button>
+            </div>
         </form>
+
+        <div id="resumePreview"></div>
     </div>
 
-    <!-- Preview of the resume -->
-    <div id="resumePreview" class="resume-preview">
-        <h2>Resume Preview</h2>
-        <div id="resumeContainer"></div>
-    </div>
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <script src="app.js" type="module"></script>
+    <script>
+        // Function to preview the resume
+        function previewResume() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const summary = document.getElementById('summary').value;
+            const skills = document.getElementById('skills').value;
+            const linkedin = document.getElementById('linkedin').value;
+            const github = document.getElementById('github').value;
+            const experience = document.getElementById('experience').value;
+            const education = document.getElementById('education').value;
+
+            const previewHtml = `
+                <h2>${name}</h2>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Skills:</strong> ${skills}</p>
+                <p><strong>LinkedIn:</strong> <a href="${linkedin}" target="_blank">${linkedin}</a></p>
+                <p><strong>GitHub:</strong> <a href="${github}" target="_blank">${github}</a></p>
+                <h3>Professional Summary</h3>
+                <p>${summary}</p>
+                <h3>Work Experience</h3>
+                <p>${experience}</p>
+                <h3>Education</h3>
+                <p>${education}</p>
+            `;
+
+            document.getElementById('resumePreview').innerHTML = previewHtml;
+        }
+
+        // Function to download the resume as PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const summary = document.getElementById('summary').value;
+            const skills = document.getElementById('skills').value;
+            const linkedin = document.getElementById('linkedin').value;
+            const github = document.getElementById('github').value;
+            const experience = document.getElementById('experience').value;
+            const education = document.getElementById('education').value;
+
+            // Add content to the PDF
+            doc.setFontSize(16);
+            doc.text(name, 10, 10);
+            doc.setFontSize(12);
+            doc.text(`Email: ${email}`, 10, 20);
+            doc.text(`Phone: ${phone}`, 10, 30);
+            doc.text(`Skills: ${skills}`, 10, 40);
+            doc.text(`LinkedIn: ${linkedin}`, 10, 50);
+            doc.text(`GitHub: ${github}`, 10, 60);
+
+            doc.text("Professional Summary:", 10, 80);
+            doc.text(summary, 10, 90, { maxWidth: 180 });
+
+            doc.text("Work Experience:", 10, 110);
+            doc.text(experience, 10, 120, { maxWidth: 180 });
+
+            doc.text("Education:", 10, 150);
+            doc.text(education, 10, 160, { maxWidth: 180 });
+
+            // Save the PDF
+            doc.save(`${name}-Resume.pdf`);
+        }
+    </script>
 </body>
 </html>
